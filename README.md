@@ -3,13 +3,13 @@ N-Gram Author Categorizer
 There are two overarching elements to our project.  They are the creation of ready corpus components and the model development.  These will be split between Christopher and Arthur, respectively.  For the purposes of our work, we’ll be using this on English-language authors, although ideally the model should work with many languages.
 
 For corpus creation, We will be using the NLTK package, specifically its corpus creation functionality, to acquire data from Project Gutenberg. (Christopher)
-https://www.nltk.org/index.html 
-https://www.gutenberg.org/
-https://www.nltk.org/book/ 
+* https://www.nltk.org/index.html 
+* https://www.gutenberg.org/
+* https://www.nltk.org/book/ 
 We will be using ten authors, with the criteria being that they have at least 25 English language releases on Project Gutenberg.
-William Shakespeare
-https://www.gutenberg.org/ebooks/author/65
-Mark Twain
+* William Shakespeare
+ https://www.gutenberg.org/ebooks/author/65
+* Mark Twain
 https://www.gutenberg.org/ebooks/author/53
 Arthur Conan Doyle
 https://www.gutenberg.org/ebooks/author/69
