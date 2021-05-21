@@ -1,4 +1,5 @@
 N-Gram Author Categorizer
+
 There are two overarching elements to our project.  They are the creation of ready corpus components and the model development.  These will be split between Christopher and Arthur, respectively.  For the purposes of our work, we’ll be using this on English-language authors, although ideally the model should work with many languages.
 
 For corpus creation, We will be using the NLTK package, specifically its corpus creation functionality, to acquire data from Project Gutenberg. (Christopher)
