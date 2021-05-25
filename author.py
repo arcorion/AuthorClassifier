@@ -22,10 +22,9 @@ def main():
     # Searches for the author in the cache.  Any matches texts are passed as frozenset to doc_list.
     doc_list = find_doc_list(name[1] + ", " + name[0])
     
-    # The directory is named after the author's last name - will want to change this later, but
-    # this should work for the moment.  There's no chance of overlap on text number, since each
-    # document number is unique.
-    dir_name = "texts/" + name[1]
+    # The directory is named after the author's name. There's no chance of
+    # overlap on text number, since each document number is unique.
+    dir_name = "texts/" + name[0] + name[1]
     try:
         os.mkdir(dir_name)
     except:
@@ -40,7 +39,10 @@ def main():
     # It seems to stall on document number 3999 for Mark Twain until I hit CTRL-C.  Why is that?
     # Possible answer - it's just long.  When I check the text file, it seems to be mid-stream.
     #
-    # Also, how to remove non-English docs? Duplicate texts?
+    # Also, how to remove non-English docs? Duplicate texts?  Audio file stuff?
+    with open(name[0] + name[1] + ".txt", "w") as concat_file:
+        pass
+
     for number in doc_list:
         try:
             load_etext(number)
@@ -51,6 +53,11 @@ def main():
             filepath = dir_name + "/" + str(number) + " " + title + ".txt"
             file = open(filepath, "w")
             file.write(download_doc(number))
+            # This is sloppy, but I wanted to make sure this was producing a concatenated
+            # file. 
+            with open(name[0] + name[1] + ".txt", "a") as concat_file:
+                concat_file.write(download_doc(number))
+
             file.close()
 
 def find_doc_list(name):
@@ -86,6 +93,7 @@ def download_doc(docNum):
     # Save local copies of texts #.txt
     # Concatenate texts
 
+    # Does this need to return the text?
     return file_text
 
 if __name__ == "__main__":
