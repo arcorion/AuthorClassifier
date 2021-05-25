@@ -1,4 +1,7 @@
-# Author basically takes an author (or list of authors) name(s), searches for matches on Project Gutenberg, and then downloads the associated text documents.  Once those documents have been downloaded, it strips the headers and either saves or passes the text.
+# Author basically takes an author (or list of authors) name(s), searches for
+# matches on Project Gutenberg, and then downloads the associated text
+# documents.  Once those documents have been downloaded, it strips the headers
+# and either saves or passes the text.
 import sys,re,gutenberg,os
 
 def main():
