@@ -65,7 +65,11 @@ def find_doc_list(name):
 
 def download_doc(docNum):
     # This function just downloads a text and returns the downloaded text.
-    # While writing this, I ran into an issue where one of the Gutenberg mirrors wasn't working.  I had to change the default mirror (though you can also use an env variable) to make it work.  You can get a list of mirrors here - https://www.gutenberg.org/MIRRORS.ALL.  I just used one of the http mirrors.
+    # While writing this, I ran into an issue where one of the Gutenberg
+    # mirrors wasn't working.  I had to change the default mirror (though you
+    # can also use an env variable) to make it work.  You can get a list of
+    # mirrors here - https://www.gutenberg.org/MIRRORS.ALL.  I just used one of
+    # the http mirrors.
     from gutenberg.acquire import load_etext
     from gutenberg.cleanup import strip_headers
     from gutenberg.query import get_metadata
