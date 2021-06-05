@@ -16,14 +16,19 @@ def main():
     except:
         print("The \"texts\" folder already exists, skipping...")
 
-
     # Asking for author's name in "FirstName LastName" format.  I then split it
     # and format the name to "LastName, FirstName", as that's what the query expects.
-    name_in = input("What author do you want to download? Please use the form: FirstName LastName: ")
+    name_in = input("What author do you want to download? Please use the form: FirstName MiddleName LastName: ")
     name = name_in.split()
 
     # Searches for the author in the cache.  Any matches texts are passed as frozenset to doc_list.
-    doc_list = find_doc_list(name[1] + ", " + name[0])
+    formatted_name = name[(len(name) - 1)] + ","
+    for num in range(0, len(name) - 1):
+        if num == (len(name) -1):
+            pass
+        else:
+            formatted_name = formatted_name + " " + name[num]
+    doc_list = find_doc_list(formatted_name)
     
     # The directory is named after the author's name. There's no chance of
     # overlap on text number, since each document number is unique.
@@ -53,9 +58,13 @@ def main():
             print("File number " + str(number) + " not downloaded, an error occurred.")
         else:
             title = next(iter(get_metadata('title', number)))
+            author = next(iter(get_metadata('author', number)))
+            print("Downloading Document Number " + str(number) + ": " + title + " by " + author + ".")
+
             filepath = dir_name + "/" + str(number) + " " + title + ".txt"
             file = open(filepath, "w")
             file.write(download_doc(number))
+
             # This is sloppy, but I wanted to make sure this was producing a concatenated
             # file. 
             with open(name[0] + name[1] + ".txt", "a") as concat_file:
@@ -63,15 +72,23 @@ def main():
 
             file.close()
 
+def download_check(number):
+    pass
+
 def find_doc_list(name):
-    # Reads a name in the format "LastName, FirstName", then returns the frozenset of texts with that author's name.
+    # Reads a name in the format "LastName, FirstName", then returns a list of texts with that author's name.
     from gutenberg.query import get_etexts
     from gutenberg.query import get_metadata
+    
+    eng_docs = []
 
     # Works out single-author texts
     text_list = get_etexts('author', name)
-
-    return text_list
+    for item in text_list:
+        metaresult = next(iter(get_metadata('language',item)))
+        if (metaresult == 'en'):
+            eng_docs.append(item)       
+    return eng_docs
 
 def download_doc(docNum):
     # This function just downloads a text and returns the downloaded text.
@@ -86,12 +103,7 @@ def download_doc(docNum):
 
     # Remove author's name from first lines
 
-
     file_text = strip_headers(load_etext(docNum)).strip()
-    title = next(iter(get_metadata('title', docNum)))
-    author = next(iter(get_metadata('author',docNum)))
-
-    print("Downloading Document Number " + str(docNum) + ": " + title + " by " + author + ".")
 
     # Save local copies of texts #.txt
     # Concatenate texts
