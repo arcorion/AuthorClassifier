@@ -99,7 +99,6 @@ def download_doc(docNum):
     # the http mirrors.
     from gutenberg.acquire import load_etext
     from gutenberg.cleanup import strip_headers
-    from gutenberg.query import get_metadata
 
     # Remove author's name from first lines
 
