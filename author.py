@@ -2,13 +2,25 @@
 # matches on Project Gutenberg, and then downloads the associated text
 # documents.  Once those documents have been downloaded, it strips the headers
 # and either saves or passes the text.
-import sys, re, gutenberg, os, argparse
+import re, gutenberg, os, argparse
 
 def main():
     from gutenberg.query import get_metadata
 
-#    parser = argparse.ArgumentParser(description='Download the English texts from an author on Project Gutenberg')
-#    parser.add_argument('')
+    # Never implimented a parser before.  Looks like the most straightforward option for Python
+    # is to use argparse - https://docs.python.org/3/howto/argparse.html
+    # Implementing two options:
+    # One: -n "Author name" - this takes the author's name and just passes it straight along.
+    # Two: -f "filename.txt" - this takes a filename and loops through the names in the file.
+    parser = argparse.ArgumentParser(description="Download the English texts" +
+                                     " from an author on Project Gutenberg")
+    parser.add_argument("-n", "--name", help = "input a string (in quotes)" + 
+                        " of one author's name")
+    parser.add_argument("-f", "--file", help = "input a filename with a " +
+                        "list of author names separated by new lines\nif" +
+                        " a file is input, the name flag is ignored")
+    args = parser.parse_args()
+
     # Making sure there's a "texts" directory.  If not, creating one.
     # (Technically, it's doing the reverse of that, making a directory
     # and failing "gracefully" if that's not right.  I should fix this later...)
@@ -16,23 +28,60 @@ def main():
         os.mkdir("texts")
     except:
         print("The \"texts\" folder already exists, skipping...")
+    # 
+    # https://www.novixys.com/blog/python-check-file-can-read-write/#2_Check_if_File_can_be_Read
+    if (args.file):
+        if (os.access(args.file, os.R_OK)):
+            author_file = open(args.file, 'r')
+            author_list = author_file.readlines()
+            # Funny timing - picked this line up from Python One-Liners
+            # by Christian Mayer a couple of nights ago.
+            author_list = [author.strip() for author in author_list]
+            print(author_list)
+        else:
+            print("File " + args.file + " is not accessible.")
+    elif (args.name):
+        author_list = [args.name]
+    else:
+        author_list = []
 
-    # Asking for author's name in "FirstName MiddleName MiddleName2 ... LastName" format.  I then split it
-    # and format the name to "LastName, FirstName MiddleName MiddleName2, etc", as that's what the query expects.
-    name_in = input("What author do you want to download?\nPlease use the form: FirstName MiddleName LastName: ")
+    acquire_documents(author_list)
+        
+def acquire_documents(author_list):
+    if (author_list):
+        for input_name in author_list:
+            # Requesting name of the author to be downloaded.
+            name_in, formatted_name = query_name(input_name)
+            # Searches for the author in the cache.  Any matched texts are passed as list to doc_list.
+            doc_list = find_doc_list(formatted_name)
+            # Writes the downloaded files
+            if (len(doc_list) > 0):
+                file_writer(name_in, doc_list)
+            else:
+                print("No texts found for the name " + name_in + ".")
+    else:
+        input_name = input("What author do you want to download?\nPlease use the form: FirstName MiddleName LastName: ")
+        name_in, formatted_name = query_name(input_name)
+        doc_list = find_doc_list(formatted_name)
+        if (len(doc_list) > 0):
+            file_writer(name_in, doc_list)
+        else:
+            print("No texts found for the name " + name_in + ".")
+
+# Asking for author's name in "FirstName MiddleName MiddleName2 ... LastName" format.  I then split it
+# and format the name to "LastName, FirstName MiddleName MiddleName2, etc", as that's what the query expects.
+def query_name(name_in):
     split_name = name_in.split()
     formatted_name = split_name[(len(split_name) - 1)] + ","
 
+    # Splitting up the name, formatting it to work with Gutenberg's search.
     for num in range(0, len(split_name) - 1):
         if num == (len(split_name) -1):
             pass
         else:
             formatted_name = formatted_name + " " + split_name[num]
-
-    # Searches for the author in the cache.  Any matched texts are passed as list to doc_list.
-    doc_list = find_doc_list(formatted_name)
-            
-    file_writer(name_in, doc_list)
+    
+    return name_in, formatted_name
 
 def file_writer(name_in, doc_list):
     from gutenberg.acquire import load_etext
@@ -61,7 +110,8 @@ def file_writer(name_in, doc_list):
             print("File number " + str(number) + " not downloaded due to " + exception_type)
         else:
             title = next(iter(get_metadata('title', number)))
-            print("Downloading Document Number " + str(number) + ": " + title + " by " + name_in + ".")
+            print("Downloading Document Number " + str(number) + ": " + title +
+                  " by " + name_in + ".")
             if (len(title) > 50):
                 title = title[:50]
 
@@ -86,9 +136,10 @@ def file_writer(name_in, doc_list):
 
             file.close()
 
-# This function generates the document list to download based on the author's name.  It specifically downloads only
-# English, single author texts that aren't part of a collection, as the collections are typically duplicates of
-# singular texts.  Note, it returns a set of documents, rather than a list, for improved performance.
+# This function generates the document list to download based on the author's name.
+# It specifically downloads just English, single author texts that aren't part of a collection,
+# as the collections are typically duplicates of singular texts.  Note, it returns a set of
+# documents, rather than a list, for improved performance.
 def find_doc_list(name):
     # Reads a name in the format "LastName, FirstName", then returns a list of texts with that author's name.
     from gutenberg.query import get_etexts
